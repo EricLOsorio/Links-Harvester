@@ -87,16 +87,25 @@ parseButton.addEventListener('click', function(){
   var emailNum=0;
 
   
- for(var i=0;i<numOfLinks;i++){
-    linkNum=i+1;
-    harvestedLinks.value+=linkNum+'. Link '+linkNum+' Title: '+obj.links[i].url+'\r\r';
+  if(numOfLinks!==0){
+    for(var i=0;i<numOfLinks;i++){
+      linkNum=i+1;
+      harvestedLinks.value+=linkNum+'. Link '+linkNum+' Title: '+obj.links[i].url+'\r\r';
+    };
   };
 
- for(var j=0;j<numOfLinks;j++){
+if(numOfeMailAddresses!==0){
+  for(var j=0;j<numOfeMailAddresses;j++){
     emailNum=j+1;
     linkNum++;
     harvestedLinks.value+=linkNum+'.  eMail '+emailNum+' Link: '+obj.emailAddresses[j]+'\r\r';
   };
+};
+
+if(numOfeMailAddresses===0 && numOfLinks===0){
+  harvestedLinks.value="No External Links or Email Addresses exist in The Input String";
+};
+
 
   output.className+="focused";
 
