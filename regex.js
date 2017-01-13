@@ -5,9 +5,8 @@ var stringInput=document.getElementById('inputString');
 var harvestedLinks=document.getElementById('output');
 
 function parseLinks(text){
-
   var arr=[];
-  var pattern0=/<a\s*(href=")(\S)*\s*\S*<\/a>/g;
+  var pattern0=/<a\s*(href=")(.*?)<\/a>/g;
   var links=text.split('<a href="');
   var numLinks=links.length-1;
   var rawLink=[];
@@ -29,12 +28,11 @@ function parseLinks(text){
   for(var i=0;i<numLinks;i++){
     arr.push(pattern0.exec(text));
   };
-
   for(var j=0;j<arr.length;j++){
     rawLink[j]=arr[j][0];
-    rawLinkPattern=/"\S*"/;
+    rawLinkPattern=/"[\S*\s*]*"/;
     urlString=rawLinkPattern.exec(rawLink[j])[0];
-    urlPattern=/[^"]\S*[^"]/;
+    urlPattern=/[^"][\S*\s*]*[^"]/;
     textLinkPattern=/>(.*?)</;
     textLinks[j]=textLinkPattern.exec(rawLink[j])[0].slice(1,textLinkPattern.exec(rawLink[j])[0].length-1);
     url[j]=urlPattern.exec(urlString)[0];
@@ -45,7 +43,7 @@ function parseLinks(text){
       wwwUrl.push(url[k]);
       wwwLinkText.push(textLinks[k]);
     }else if(url[k].match("mailto:")){
-        emailOnlyPattern=/[^(mailto:)]\S*/;
+        emailOnlyPattern=/[^(mailto:)][\S*\s*]*/;
       emailString=emailOnlyPattern.exec(url[k]);
       emailAddress.push(emailString);
     };
