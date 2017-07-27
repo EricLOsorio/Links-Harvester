@@ -1,116 +1,139 @@
 window.onload=(function(){
 
 var parseButton=document.getElementById('button');
+
 var stringInput=document.getElementById('inputString');
+
 var harvestedLinks=document.getElementById('output');
 
 
 function parseLinks(text){
 
-  var arr=[];
-  var pattern0=/<a\s*(href=")(.*?)<\/a>/g;
-  var links=text.split('<a href="');
-  var numLinks=links.length-1;
-  var rawLink=[];
-  var rawLinkPattern="";
-  var urlString="";
-  var urlPattern="";
-  var url=[];
-  var wwwUrl=[];
-  var wwwLinkText=[];
-  var emailAddress=[];
-  var emailOnlyPattern="";
-  var emailString="";
-  var linksAndEmailsArray=[];
-  var textLinkPattern="";
-  var textLinks=[];
-  var endOfLinkIndx=0;
-  var objString="";
-  var jsonObject="";
+var pattern = /(mailto:(.*?)">(.*?)<)|(http(s)?:\/\/)(.*?)">(.*?)</g,
+
+    arr=[],  //initial array to store regex search results
+
+    links=text.split('<a href="'),  //split text to determine number of links
+   
+    numLinks=links.length-1,  //number of links in text
+    
+    hrefs=[],  //array to hold  only valid hrefs
+    
+    emailsArr=[], //array to hold only email links
+   
+    linksArr=[]; //array to hold link objects composed of linkText and url
+   
+
+   function linksObject(linkText,url){
+
+     this.linkText=linkText,
+
+     this.url=url
+   }
+
+   function harvestObject(links,emailAddresses){
+
+     this.links=links,
+
+     this.emailAddresses=emailAddresses
+   }
+
   for(var i=0;i<numLinks;i++){
-    arr.push(pattern0.exec(text));
-  };
-  for(var j=0;j<arr.length;j++){
-    rawLink[j]=arr[j][0];
-    rawLinkPattern=/"[\S*\s*]*"/;
-    urlString=rawLinkPattern.exec(rawLink[j])[0];
-    urlPattern=/["](.*?)["]/;
-    textLinkPattern=/>(.*?)</;
-    textLinks[j]=textLinkPattern.exec(rawLink[j])[0].slice(1,textLinkPattern.exec(rawLink[j])[0].length-1);
-    url[j]=urlPattern.exec(urlString)[0].slice(1,urlPattern.exec(rawLink[j])[0].length-1);
+
+      arr.push(pattern.exec(text));  //get all matches for our patter
+
   };
 
-  for(var k=0;k<url.length;k++){
-    if(url[k].match("http:")||url[k].match("https:")){
-      wwwUrl.push(url[k]);
-      wwwLinkText.push(textLinks[k]);
-    }else if(url[k].match("mailto:")){
-        emailOnlyPattern=/[^(mailto:)][\S*\s*]*/;
-      emailString=emailOnlyPattern.exec(url[k]);
-      emailAddress.push(emailString);
-    };
-  };
+   hrefs=arr.filter(function(arr){
 
-  linksAndEmailsArray=[wwwLinkText,wwwUrl,emailAddress]
+     return arr;  //filter only valid matches, no nulls
 
-  objString='{"links":[';
-  if(wwwUrl.length !==0){
-    objString+='{';
-    for(var i=0;i<wwwUrl.length;i++){
-      objString+='"linkText":'+'"'+wwwLinkText[i]+'"'+',';
-      objString+='"url":'+'"'+wwwUrl[i]+'"}';
-      if(i<wwwUrl.length-1){
-        objString+=',{';
-      };
-    };
-  };
-  objString+='], "emailAddresses":[';
-  for(var j=0;j<emailAddress.length;j++){
-    objString+='"'+emailAddress[j]+'"';
-    if(j<emailAddress.length-1){
-      objString+=',';
-    };
-  };
-  objString+=']}';
+  });
 
-  jsonObject=JSON.parse(objString);
 
-  return jsonObject;
+for(var i=0;i<hrefs.length;i++){ //separate parts we care about
+
+  var email=/^mailto:/;
+
+  if(email.test(hrefs[i][0])){
+
+    emailsArr.push(hrefs[i][2]);  //put email links in the emailsArr array
+
+  } else{
+
+      var linksObj=new linksObject(hrefs[i][7],hrefs[i][6]); //create links object
+
+      linksArr.push(linksObj); //pus links objects into the linksArr array
+
+  }
+
+}
+
+var returnObject=new harvestObject(linksArr,emailsArr); //create the object to be returned
+
+return returnObject;
 
 };
 
+
+
+/*******Clear the output window highlight when input window is clicked*********/
+
 stringInput.addEventListener('click',function(){
+
   output.className="";
+
 })
+
+/********Parse Text, store in object and format output response*****************/
 
 parseButton.addEventListener('click', function(){
 
-  var obj=parseLinks(stringInput.value);
-  var numOfLinks=obj.links.length;
-  var numOfeMailAddresses=obj.emailAddresses.length;
-  var linkNum=0;
-  var emailNum=0;
+  var obj=parseLinks(stringInput.value);  //parse text
 
-  if(numOfLinks!==0){
+  var numOfLinks=obj.links.length;  //how many site links
+
+  var numOfeMailAddresses=obj.emailAddresses.length; //how many email addresses
+
+  var linkNum=0; //keep track to display link as the nth link
+
+  var emailNum=0; //keep track to display email as the nth email address
+
+  harvestedLinks.value="";  //clear any previous output
+
+  if(numOfLinks!==0){  //If links present get info from object and format output 
+
     for(var i=0;i<numOfLinks;i++){
+
       linkNum=i+1;
+
       harvestedLinks.value+=linkNum+'. Link '+linkNum+' Title: '+obj.links[i].url+'\r\r';
+
     };
+
   };
 
-if(numOfeMailAddresses!==0){
+if(numOfeMailAddresses!==0){ //if email addresses present get info from object and format output
+
   for(var j=0;j<numOfeMailAddresses;j++){
+
     emailNum=j+1;
+
     linkNum++;
+
     harvestedLinks.value+=linkNum+'.  eMail '+emailNum+' Link: '+obj.emailAddresses[j]+'\r\r';
+
   };
+
 };
 
-if(numOfeMailAddresses===0 && numOfLinks===0){
+if(numOfeMailAddresses===0 && numOfLinks===0){ //If no links or emails present display message
+
   harvestedLinks.value="No External Links or Email Addresses exist in The Input String";
+
 };
 
-  output.className+="focused";
+  output.className+="focused"; 
 
 
 });
