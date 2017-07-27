@@ -24,14 +24,14 @@ var pattern = /(mailto:(.*?)">(.*?)<)|(http(s)?:\/\/)(.*?)">(.*?)</g,
     linksArr=[]; //array to hold link objects composed of linkText and url
    
 
-   function linksObject(linkText,url){
+   function linksObject(linkText,url){ //constructor for links objects
 
      this.linkText=linkText,
 
      this.url=url
    }
 
-   function harvestObject(links,emailAddresses){
+   function harvestObject(links,emailAddresses){ //constructor for returned Objects with all harvested links
 
      this.links=links,
 
@@ -40,7 +40,7 @@ var pattern = /(mailto:(.*?)">(.*?)<)|(http(s)?:\/\/)(.*?)">(.*?)</g,
 
   for(var i=0;i<numLinks;i++){
 
-      arr.push(pattern.exec(text));  //get all matches for our patter
+      arr.push(pattern.exec(text));  //get all matches for our pattern
 
   };
 
@@ -63,7 +63,7 @@ for(var i=0;i<hrefs.length;i++){ //separate parts we care about
 
       var linksObj=new linksObject(hrefs[i][7],hrefs[i][6]); //create links object
 
-      linksArr.push(linksObj); //pus links objects into the linksArr array
+      linksArr.push(linksObj); //put links objects into the linksArr array
 
   }
 
